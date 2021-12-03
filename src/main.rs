@@ -2,6 +2,7 @@ use std::time::Duration;
 
 use tinyroute::client::{connect, TcpClient, ClientMessage};
 use tinyroute::frame::Frame;
+use neotwitch::{Irc, IrcMessage};
 
 
 async fn run() {
@@ -28,7 +29,12 @@ async fn run() {
     while let Ok(msg) = client_rx.recv_async().await {
         // Deserialize message
         // do something with it
-        eprintln!("{}", String::from_utf8(msg).unwrap());
+
+        if let Ok(chat) = serde_json::from_slice::<Irc>(&msg) {
+            if let Irc::Message(m) = chat {
+                eprintln!("{} > {}", m.nick, m.message);
+            }
+        }
     }
 
 }
